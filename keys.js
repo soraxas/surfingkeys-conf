@@ -13,12 +13,22 @@ const unmaps = {
     "Q", "q", "ag",
     "af", ";s", "yp",
     "<Ctrl-j>", "<Ctrl-h>",
+    "<Ctrl-d>", "<Ctrl-u>",
+//    "<Ctrl-n>", "<Ctrl-k>",
   ],
   searchAliases: {
     s: ["g", "d", "b",
       "w", "s", "h"],
   },
 }
+
+// Scroll Page Down/Up
+// 3. Select search result in Omnibar
+// <alt-[jkhl]>
+//cmap('<Alt-j>','<Ctrl-n>');
+//cmap('<Alt-k>','<Ctrl-p>');
+//cmap('<Alt-l>','<Ctrl-.>');
+//cmap('<Alt-h>','<Ctrl-,>');
 
 const maps = {
   global: [
@@ -29,31 +39,25 @@ const maps = {
       description: "Open a link in non-active new tab",
     },
     {
+      alias:       "<Alt-f>",
+      map:         "cf",
+      category:    categories.mouseClick,
+      description: "Open multiple links in a new tab",
+    },
+    {
       alias:       "zf",
       category:    categories.mouseClick,
       description: "Open link URL in vim editor",
       callback:    actions.previewLink,
     },
     {
-      alias:       "w",
-      map:         "k",
-      category:    categories.scroll,
-      description: "Scroll up",
-    },
-    {
-      alias:       "s",
-      map:         "j",
-      category:    categories.scroll,
-      description: "Scroll down",
-    },
-    {
-      alias:       "K",
+      alias:       "<Ctrl-u>",
       map:         "e",
       category:    categories.scroll,
       description: "Scroll half page up",
     },
     {
-      alias:       "J",
+      alias:       "<Ctrl-d>",
       map:         "d",
       category:    categories.scroll,
       description: "Scroll half page down",
@@ -166,6 +170,42 @@ const maps = {
       callback:    actions.togglePdfViewer,
     },
     {
+      alias:       "H",
+      map:         "S",
+      category:    categories.tabs,
+      description: "Go back in history",
+    },
+    {
+      alias:       "L",
+      map:         "D",
+      category:    categories.tabs,
+      description: "Go forward in history",
+    },
+    {
+      alias:       "J",
+      map:         "E",
+      category:    categories.tabs,
+      description: "Go one tab left",
+    },
+    {
+      alias:       "K",
+      map:         "R",
+      category:    categories.tabs,
+      description: "Go one tab right",
+    },
+    {
+      alias:       "gxJ",
+      map:         "gxt",
+      category:    categories.tabs,
+      description: "Close tab to left",
+    },
+    {
+      alias:       "gxK",
+      map:         "gxT",
+      category:    categories.tabs,
+      description: "Close tab to right",
+    },
+    {
       alias:       "gxE",
       map:         "gxt",
       category:    categories.tabs,
@@ -176,6 +216,18 @@ const maps = {
       map:         "gxT",
       category:    categories.tabs,
       description: "Close tab to right",
+    },
+    {
+      alias:       "<Alt-j>",
+      map:         "<Ctrl-n>",
+      category:    categories.omnibar,
+      description: "Forward cycle through the candidates",
+    },
+    {
+      alias:       "<Alt-k>",
+      map:         "<Ctrl-p>",
+      category:    categories.omnibar,
+      description: "Backward cycle through the candidates",
     },
   ],
 
