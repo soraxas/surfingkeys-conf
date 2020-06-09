@@ -6,6 +6,11 @@ The source file is README.tmpl.md
 
 -->
 
+Raw url for SurfingKeys.js settings:
+```sh
+https://raw.githubusercontent.com/soraxas/surfingkeys-conf/MY-LOCAL-USE/build/surfingkeys.js
+```
+
 Maddy's SurfingKeys Configuration
 =================================
 
