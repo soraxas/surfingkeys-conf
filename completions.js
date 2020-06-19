@@ -220,6 +220,49 @@ completions.se = {
   search: "https://stackexchange.com/search?q=",
 }
 
+// theasurus.com
+completions.sy = {
+  alias:  "sy",
+  name:   "synonyms & antonyms",
+  search: "https://www.thesaurus.com/browse/",
+  compl:  "https://tuna.thesaurus.com/pageData/",
+}
+
+completions.sy.callback = (response, input) => {
+  const data = JSON.parse(response.text).data
+  if(!data)
+    return []
+  
+  const maxLength = 10;
+  const words = []
+  const def = data.definitionData.definitions[0]
+  // sort ascend
+  let synonyms = def.synonyms
+  synonyms.sort((a, b) => parseInt(b.similarity) - parseInt(a.similarity))
+  synonyms = synonyms.slice(0, maxLength)
+  synonyms.forEach((s) => {
+    const w = createSuggestionItem(`
+        [syn: ${escape(s.similarity)}] <div class="title" style="display: inline"><strong>${escape(s.term)}</strong></div>
+    `, { url: `https://thesaurus.com/browse/${escape(s.targetSlug)}` })
+
+    words.push(w)
+  })
+  // sort descend
+  let antonyms = def.antonyms
+  console.log(antonyms)
+  console.log(antonyms.sort((a, b) => parseInt(a.similarity) - parseInt(b.similarity)))
+  antonyms = antonyms.slice(0, maxLength)
+  console.log(antonyms)
+  antonyms.forEach((s) => {
+    const w = createSuggestionItem(`
+        [ant: ${escape(s.similarity)}] <div class="url" style="display: inline"><strong>${escape(s.term)}</strong></div>
+    `, { url: `https://thesaurus.com/browse/${escape(s.targetSlug)}` })
+
+    words.push(w)
+  })
+  return words
+}
+
 // DockerHub repo search
 completions.dh = {
   alias:  "dh",
