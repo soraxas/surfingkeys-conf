@@ -249,10 +249,8 @@ completions.sy.callback = (response, input) => {
   })
   // sort descend
   let antonyms = def.antonyms
-  console.log(antonyms)
-  console.log(antonyms.sort((a, b) => parseInt(a.similarity) - parseInt(b.similarity)))
+  antonyms.sort((a, b) => parseInt(a.similarity) - parseInt(b.similarity))
   antonyms = antonyms.slice(0, maxLength)
-  console.log(antonyms)
   antonyms.forEach((s) => {
     const w = createSuggestionItem(`
         [ant: ${escape(s.similarity)}] <div class="url" style="display: inline"><strong>${escape(s.term)}</strong></div>
