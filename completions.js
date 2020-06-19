@@ -220,6 +220,21 @@ completions.se = {
   search: "https://stackexchange.com/search?q=",
 }
 
+// Google scholar
+completions.gs = {
+  alias:  "gs",
+  name:   "Google Scholar",
+  search: "https://scholar.google.com/scholar?hl=en&q=",
+  compl:  "https://scholar.google.com/scholar_complete?q=%s&hl=en",
+}
+
+completions.gs.callback = (response) => JSON.parse(response.text).l.map((s) => {
+  const regex = /^.*?[|]/gi;
+  return createSuggestionItem(`
+      ${escape(s.replace(regex, '... '))}
+  `, { url: `https://scholar.google.com/scholar?hl=en&q=${escape(s.replace('|', ''))}` })
+})
+
 // theasurus.com
 completions.sy = {
   alias:  "sy",
@@ -952,17 +967,17 @@ completions.gw.callback = (response) => JSON.parse(response.text).results.map((s
 })
 
 
-// Go-Search
-completions.gs = {
-  alias:   "gs",
-  name:    "go-search",
-  favicon: "https://go-search.org/images/logo-16.png",
-  search:  "http://go-search.org/search?q=",
-  compl:   "http://go-search.org/api?action=search&q=",
-}
+// // Go-Search
+// completions.gs = {
+//   alias:   "gs",
+//   name:    "go-search",
+//   favicon: "https://go-search.org/images/logo-16.png",
+//   search:  "http://go-search.org/search?q=",
+//   compl:   "http://go-search.org/api?action=search&q=",
+// }
 
-completions.gs.callback = (response) => JSON.parse(response.text).hits
-  .map((r) => r.package)
+// completions.gs.callback = (response) => JSON.parse(response.text).hits
+//   .map((r) => r.package)
 
 
 // ****** Haskell ****** //
