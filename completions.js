@@ -449,7 +449,8 @@ const parseDatamuseRes = (res, o = {}) => {
 completions.de = {
   alias:  "de",
   name:   "define",
-  search: "http://onelook.com/?w=",
+  search: "https://www.dictionary.com/browse/",
+  // search: "http://onelook.com/?w=",
   compl:  "https://api.datamuse.com/words?md=d&sp=%s*",
   opts:   {
     maxDefs:     16,
