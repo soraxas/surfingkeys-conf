@@ -22,6 +22,11 @@ $(CONF): $(JS_SRC)
 	#	use a tmp file to echo to beginning of file
 	printf '%s\n' $(BUILT_COMMENT) $(URL_COMMENT) | cat - $(CONF) > $(CONF_TMP) && mv $(CONF_TMP) $(CONF)
 
+publish: $(CONF)
+	git add -f $(CONF)
+	git commit -m 'update surfingkeys.js config'
+	git push
+
 clean:
 	rm $(DIR)/*
 
