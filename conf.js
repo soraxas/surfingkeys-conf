@@ -90,6 +90,7 @@ const searchleader = "s"
 // Process mappings and completions
 // See ./keys.js and ./completions.js
 util.rmMaps(keys.unmaps.mappings)
+util.rmIMaps(keys.unmaps.imappings)
 util.rmSearchAliases(keys.unmaps.searchAliases)
 util.processMaps(keys.maps, keys.aliases, siteleader)
 util.processCompletions(completions, searchleader)

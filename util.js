@@ -94,6 +94,15 @@ util.rmMaps = (a) => {
   a.forEach((u) => unmap(u))
 }
 
+// Process Iunmaps
+util.rmIMaps = (a) => {
+  /* global iunmap */
+  if (typeof iunmap === "undefined") {
+    return
+  }
+  a.forEach((u) => iunmap(u))
+}
+
 util.rmSearchAliases = (a) => Object.entries(a).forEach(([leader, items]) => {
   if (typeof removeSearchAliasX === "undefined") {
     return
