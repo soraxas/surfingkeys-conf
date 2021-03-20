@@ -228,10 +228,10 @@ completions.gs = {
 }
 
 completions.gs.callback = (response) => JSON.parse(response.text).l.map((s) => {
-  const regex = /^.*?[|]/gi;
+  const regex = /^.*?[|]/gi
   return createSuggestionItem(`
-      ${escape(s.replace(regex, '... '))}
-  `, { url: `https://scholar.google.com/scholar?hl=en&q=${escape(s.replace('|', ''))}` })
+      ${escape(s.replace(regex, "... "))}
+  `, { url: `https://scholar.google.com/scholar?hl=en&q=${escape(s.replace("|", ""))}` })
 })
 
 // theasurus.com
@@ -242,33 +242,46 @@ completions.sy = {
   compl:  "https://tuna.thesaurus.com/pageData/",
 }
 
-completions.sy.callback = (response, input) => {
-  const data = JSON.parse(response.text).data
-  if(!data)
-    return []
+completions.sy.callback = (response, input) => { // eslint-disable-line no-unused-vars
+  const { data } = JSON.parse(response.text)
+  if (!data) return []
 
-  const maxLength = 10;
+  const maxLength = 10
   const words = []
   const def = data.definitionData.definitions[0]
   // sort ascend
-  let synonyms = def.synonyms
-  synonyms.sort((a, b) => parseInt(b.similarity) - parseInt(a.similarity))
+  let { synonyms } = def
+  synonyms.sort((a, b) => parseInt(b.similarity, 10) - parseInt(a.similarity, 10))
   synonyms = synonyms.slice(0, maxLength)
   synonyms.forEach((s) => {
-    const w = createSuggestionItem(`
-        [syn: ${escape(s.similarity)}] <div class="title" style="display: inline"><strong>${escape(s.term)}</strong></div>
-    `, { url: `https://thesaurus.com/browse/${escape(s.targetSlug)}` })
+    const w = createSuggestionItem(
+      `
+        [syn: ${escape(
+    s.similarity,
+  )}] <div class="title" style="display: inline"><strong>${escape(
+  s.term,
+)}</strong></div>
+    `,
+      { url: `https://thesaurus.com/browse/${escape(s.targetSlug)}` },
+    )
 
     words.push(w)
   })
   // sort descend
-  let antonyms = def.antonyms
-  antonyms.sort((a, b) => parseInt(a.similarity) - parseInt(b.similarity))
+  let { antonyms } = def
+  antonyms.sort((a, b) => parseInt(a.similarity, 10) - parseInt(b.similarity, 10))
   antonyms = antonyms.slice(0, maxLength)
   antonyms.forEach((s) => {
-    const w = createSuggestionItem(`
-        [ant: ${escape(s.similarity)}] <div class="url" style="display: inline"><strong>${escape(s.term)}</strong></div>
-    `, { url: `https://thesaurus.com/browse/${escape(s.targetSlug)}` })
+    const w = createSuggestionItem(
+      `
+        [ant: ${escape(
+    s.similarity,
+  )}] <div class="url" style="display: inline"><strong>${escape(
+  s.term,
+)}</strong></div>
+    `,
+      { url: `https://thesaurus.com/browse/${escape(s.targetSlug)}` },
+    )
 
     words.push(w)
   })

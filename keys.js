@@ -14,7 +14,7 @@ const unmaps = {
     "af", ";s", "yp",
     "<Ctrl-j>", "<Ctrl-h>",
     "<Ctrl-d>", "<Ctrl-u>",
-//    "<Ctrl-n>", "<Ctrl-k>",
+    //    "<Ctrl-n>", "<Ctrl-k>",
   ],
   searchAliases: {
     s: ["g", "d", "b",

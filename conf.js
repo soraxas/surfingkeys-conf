@@ -19,18 +19,18 @@ util.addSettings({
   omnibarSuggestionTimeout: 500,
   richHintsForKeystroke:    1,
 
-  blacklistPattern: blacklistPattern,
- // defaultSearchEngine: "s",
+  blacklistPattern,
+  // defaultSearchEngine: "s",
   // omnibarPosition: "bottom",
   focusFirstCandidate: false,
-  focusAfterClosed: "last",
+  focusAfterClosed:    "last",
   // scrollStepSize: 200,
-  scrollStepSize: 150,
+  scrollStepSize:      150,
   // tabsThreshold: 7,
-  modeAfterYank: "Normal",
-  hintShiftNonActive: true,
-  defaultSearchEngine:      "dd",
-  theme:                    `
+  modeAfterYank:       "Normal",
+  hintShiftNonActive:  true,
+  defaultSearchEngine: "dd",
+  theme:               `
     body {
       font-family: "DejaVu Sans", DejaVu, Arial, sans-serif;
     }
@@ -47,35 +47,35 @@ util.addSettings({
 
 if (typeof Front !== "undefined") {
   Front.registerInlineQuery({
-      url: function(q) {
-          return `http://dict.youdao.com/w/eng/${q}/#keyfrom=dict2.index`;
-      },
-      parseResult: function(res) {
-          var parser = new DOMParser();
-          var doc = parser.parseFromString(res.text, "text/html");
-          var collinsResult = doc.querySelector("#collinsResult");
-          var authTransToggle = doc.querySelector("#authTransToggle");
-          var examplesToggle = doc.querySelector("#examplesToggle");
-          if (collinsResult) {
-              collinsResult.querySelectorAll("div>span.collinsOrder").forEach(function(span) {
-                  span.nextElementSibling.prepend(span);
-              });
-              collinsResult.querySelectorAll("div.examples").forEach(function(div) {
-                  div.innerHTML = div.innerHTML.replace(/<p/gi, "<span").replace(/<\/p>/gi, "</span>");
-              });
-              var exp = collinsResult.innerHTML;
-              return exp;
-          } else if (authTransToggle) {
-              authTransToggle.querySelector("div.via.ar").remove();
-              return authTransToggle.innerHTML;
-          } else if (examplesToggle) {
-              return examplesToggle.innerHTML;
-          }
+    url(q) {
+      return `http://dict.youdao.com/w/eng/${q}/#keyfrom=dict2.index`
+    },
+    parseResult(res) {
+      /* eslint no-param-reassign: ["error", { "props": false }] */
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(res.text, "text/html")
+      const collinsResult = doc.querySelector("#collinsResult")
+      const authTransToggle = doc.querySelector("#authTransToggle")
+      const examplesToggle = doc.querySelector("#examplesToggle")
+      if (collinsResult) {
+        collinsResult.querySelectorAll("div>span.collinsOrder").forEach((span) => {
+          span.nextElementSibling.prepend(span)
+        })
+        collinsResult.querySelectorAll("div.examples").forEach((div) => {
+          div.innerHTML = div.innerHTML.replace(/<p/gi, "<span").replace(/<\/p>/gi, "</span>")
+        })
+        const exp = collinsResult.innerHTML
+        return exp
+      } if (authTransToggle) {
+        authTransToggle.querySelector("div.via.ar").remove()
+        return authTransToggle.innerHTML
+      } if (examplesToggle) {
+        return examplesToggle.innerHTML
       }
-  });
+      return null
+    },
+  })
 }
-
-
 
 if (typeof Hints !== "undefined") {
   Hints.characters = "asdfgyuiopqwertnmzxcvb"
@@ -96,15 +96,7 @@ util.processCompletions(completions, searchleader)
 
 module.exports = { siteleader, searchleader }
 
-
-
-
-
-
-
-
-
-
+/* eslint max-len: ["error", { "ignoreComments": true, "ignoreStrings": true, "ignoreTemplateLiterals": true, "code": 100 }] */
 // 5. set theme for ScriptingKeys UI
 // ---- Hints ----
 // Hints have to be defined separately
@@ -114,12 +106,13 @@ module.exports = { siteleader, searchleader }
 // /* -- DELETE LINE TO ENABLE THEME
 
 if (typeof Hints !== "undefined") {
-  Hints.style('border: solid 1px #C5C8C6; color:#52C196; background: initial; background-color: #1D1F21;');
-  Hints.style("border: solid 1px #C5C8C6 !important; padding: 1px !important; color: #C5C8C6 !important; background: #FD971F !important;", "text");
+  Hints.style("border: solid 1px #C5C8C6; color:#52C196; background: initial; background-color: #1D1F21;")
+  Hints.style("border: solid 1px #C5C8C6 !important; padding: 1px !important; color: #C5C8C6 !important; background: #FD971F !important;", "text")
 }
 if (typeof Visual !== "undefined") {
-  Visual.style('marks', 'background-color: #52C19699;');
-  Visual.style('cursor', 'background-color: #51AFEF;');
+  /* global Visual */
+  Visual.style("marks", "background-color: #52C19699;")
+  Visual.style("cursor", "background-color: #51AFEF;")
 }
 // -- DELETE LINE TO ENABLE THEME */
 
@@ -452,5 +445,5 @@ if (typeof settings !== "undefined") {
     font-size: var(--font-size);
     font-weight: var(--font-weight);
   }
-  `;
+  `
 }
