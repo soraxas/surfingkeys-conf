@@ -5,6 +5,8 @@ const wpDefaultIcon = "data:image/svg+xml,%3C%3Fxml%20version%3D%221.0%22%20enco
 
 const cbDefaultIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAAAAAByaaZbAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAACYktHRAD/h4/MvwAAAAlwSFlzAAAOwwAADsMBx2+oZAAAAAd0SU1FB+EICxEMErRVWUQAAABOdEVYdFJhdyBwcm9maWxlIHR5cGUgZXhpZgAKZXhpZgogICAgICAyMAo0NTc4Njk2NjAwMDA0OTQ5MmEwMDA4MDAwMDAwMDAwMDAwMDAwMDAwCnwMkD0AAAGXSURBVEjH1ZRvc4IwDMb7/T8dbVr/sEPlPJQd3g22GzJdmxVOHaQa8N2WN7wwvyZ5Eh/hngzxTwDr0If/TAK67POxbqxnpgCIx9dkrkEvswYnAFiutFSgtQapS4ejwFYqbXQXBmC+QxawuI/MJb0LiCq0DICNHoZRKQdYLKQZEhATcQmwDYD5GR8DDtfqaYAMActvTiVMaUvqhZPVYhYAK2SBAwGMTHngnc4wVmFPW9L6k1PJxbSCkfvhqolKSQhsWSClizNyxwAWdzIADixQRXRmdWSHthsg+TknaztFMZgC3vh/nG/qo68TLAKrCSrUg1ulp3cH+BpItBp3DZf0lFXVOIDnBdwKkLO4D5Q3QMO6HJ+hUb1NKNWMGJn3jf4ejPKn99CXOtsuyab95obGL/rpdZ7oIJK87iPiumG01drbdggoCZuq/f0XaB8/FbG62Ta5cD97XJwuZUT7ONbZTIK5m94hBuQs8535MsL5xxPw6ZoNj0DiyzhhcyMf9BJ0Jk1uRRpNyb4y0UaM9UI7E8+kt/EHgR/R6042JzmiwgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxNy0wOC0xMVQxNzoxMjoxOC0wNDowMLy29LgAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTctMDgtMTFUMTc6MTI6MTgtMDQ6MDDN60wEAAAAAElFTkSuQmCC"
 
+const locale = typeof navigator !== "undefined" ? navigator.language : ""
+
 const completions = {}
 
 // Helper functions for Google Custom Search Engine completions
@@ -41,11 +43,10 @@ completions.al = {
 
 // Arch Linux AUR
 completions.au = {
-  alias:   "au",
-  name:    "AUR",
-  favicon: "https://aur.archlinux.org/images/favicon.ico",
-  search:  "https://aur.archlinux.org/packages/?O=0&SeB=nd&outdated=&SB=v&SO=d&PP=100&do_Search=Go&K=",
-  compl:   "https://aur.archlinux.org/rpc?type=suggest&arg=",
+  alias:  "au",
+  name:   "AUR",
+  search: "https://aur.archlinux.org/packages/?O=0&SeB=nd&outdated=&SB=v&SO=d&PP=100&do_Search=Go&K=",
+  compl:  "https://aur.archlinux.org/rpc?type=suggest&arg=",
 }
 
 completions.au.callback = (response) => {
@@ -127,12 +128,10 @@ completions.at.callback = (response) => {
 completions.cs = {
   alias:    "cs",
   name:     "chromestore",
-  favicon:  "https://www.google.com/images/icons/product/chrome_web_store-32.png",
   search:   "https://chrome.google.com/webstore/search/",
   compl:    googleCxURL("cs"),
   callback: googleCxCallback,
 }
-
 
 const parseFirefoxAddonsRes = (response) => JSON.parse(response.text).results.map((s) => {
   let { name } = s
@@ -170,7 +169,7 @@ const parseFirefoxAddonsRes = (response) => JSON.parse(response.text).results.ma
 completions.fa = {
   alias:    "fa",
   name:     "firefox-addons",
-  search:   "https://addons.mozilla.org/en-US/firefox/search/?q=",
+  search:   `https://addons.mozilla.org/${locale}/firefox/search/?q=`,
   compl:    "https://addons.mozilla.org/api/v4/addons/autocomplete/?q=",
   callback: parseFirefoxAddonsRes,
 }
@@ -179,7 +178,7 @@ completions.fa = {
 completions.ft = {
   alias:    "ft",
   name:     "firefox-themes",
-  search:   "https://addons.mozilla.org/en-US/firefox/search/?type=statictheme&q=",
+  search:   `https://addons.mozilla.org/${locale}/firefox/search/?type=statictheme&q=`,
   compl:    "https://addons.mozilla.org/api/v4/addons/autocomplete/?type=statictheme&q=",
   callback: parseFirefoxAddonsRes,
 }
@@ -188,7 +187,7 @@ completions.ft = {
 completions.fe = {
   alias:    "fe",
   name:     "firefox-extensions",
-  search:   "https://addons.mozilla.org/en-US/firefox/search/?type=extension&q=",
+  search:   `https://addons.mozilla.org/${locale}/firefox/search/?type=extension&q=`,
   compl:    "https://addons.mozilla.org/api/v4/addons/autocomplete/?type=extension&q=",
   callback: parseFirefoxAddonsRes,
 }
@@ -247,7 +246,7 @@ completions.sy.callback = (response, input) => {
   const data = JSON.parse(response.text).data
   if(!data)
     return []
-  
+
   const maxLength = 10;
   const words = []
   const def = data.definitionData.definitions[0]
@@ -348,11 +347,10 @@ completions.do.callback = (response) => Object.entries(JSON.parse(response.text)
 
 // Vim Wiki
 completions.vw = {
-  alias:   "vw",
-  name:    "vimwiki",
-  favicon: "https://vignette.wikia.nocookie.net/vim/images/6/64/Favicon.ico",
-  search:  "https://vim.fandom.com/wiki/Special:Search?query=",
-  compl:   "https://vim.fandom.com/api.php?action=opensearch&format=json&formatversion=2&namespace=0&limit=10&suggest=true&search=",
+  alias:  "vw",
+  name:   "vimwiki",
+  search: "https://vim.fandom.com/wiki/Special:Search?query=",
+  compl:  "https://vim.fandom.com/api.php?action=opensearch&format=json&formatversion=2&namespace=0&limit=10&suggest=true&search=",
 }
 
 completions.vw.callback = (response) => JSON.parse(response.text)[1]
@@ -740,7 +738,6 @@ completions.dv = {
   callback: completions.dd.callback,
 }
 
-
 // DuckDuckGo News
 completions.dn = {
   alias:    "dn",
@@ -778,6 +775,13 @@ completions.gi = {
   callback: completions.go.callback,
 }
 
+// Google Images (reverse image search by URL)
+completions.gI = {
+  alias:  "gI",
+  name:   "google-reverse-image",
+  search: "https://www.google.com/searchbyimage?image_url=",
+}
+
 // Google - I'm Feeling Lucky
 completions.G = {
   alias:    "G",
@@ -786,6 +790,16 @@ completions.G = {
   compl:    "https://www.google.com/complete/search?client=chrome-omni&gs_ri=chrome-ext&oit=1&cp=1&pgcl=7&q=",
   callback: completions.go.callback,
 }
+
+// Google Scholar
+completions.gs = {
+  alias:  "gs",
+  name:   "google-scholar",
+  search: "https://scholar.google.com/scholar?q=",
+  compl:  "https://scholar.google.com/scholar_complete?q=",
+}
+
+completions.gs.callback = (response) => JSON.parse(response.text).l
 
 //  ****** Elixir ****** //
 
@@ -949,11 +963,10 @@ completions.gd.callback = (response) => JSON.parse(response.text).results.map((s
 
 // Gowalker
 completions.gw = {
-  alias:   "gw",
-  name:    "gowalker",
-  favicon: "https://gowalker.org/img/favicon.png",
-  search:  "https://gowalker.org/search?auto_redirect=true&q=",
-  compl:   "https://gowalker.org/search/json?q=",
+  alias:  "gw",
+  name:   "gowalker",
+  search: "https://gowalker.org/search?auto_redirect=true&q=",
+  compl:  "https://gowalker.org/search/json?q=",
 }
 
 completions.gw.callback = (response) => JSON.parse(response.text).results.map((s) => {
@@ -967,29 +980,14 @@ completions.gw.callback = (response) => JSON.parse(response.text).results.map((s
   `, { url: `https://golang.org/doc/${encodeURIComponent(s.url)}` })
 })
 
-
-// // Go-Search
-// completions.gs = {
-//   alias:   "gs",
-//   name:    "go-search",
-//   favicon: "https://go-search.org/images/logo-16.png",
-//   search:  "http://go-search.org/search?q=",
-//   compl:   "http://go-search.org/api?action=search&q=",
-// }
-
-// completions.gs.callback = (response) => JSON.parse(response.text).hits
-//   .map((r) => r.package)
-
-
 // ****** Haskell ****** //
 
 // Hackage
 completions.ha = {
-  alias:   "ha",
-  name:    "hackage",
-  favicon: "https://hackage.haskell.org/static/favicon.png",
-  search:  "https://hackage.haskell.org/packages/search?terms=",
-  compl:   "https://hackage.haskell.org/packages/search.json?terms=",
+  alias:  "ha",
+  name:   "hackage",
+  search: "https://hackage.haskell.org/packages/search?terms=",
+  compl:  "https://hackage.haskell.org/packages/search.json?terms=",
 }
 
 completions.ha.callback = (response) => JSON.parse(response.text)
@@ -997,12 +995,11 @@ completions.ha.callback = (response) => JSON.parse(response.text)
 
 // Hoogle
 completions.ho = {
-  alias:   "ho",
-  name:    "hoogle",
-  favicon: "https://www.haskell.org/img/favicon.ico",
-  search:  `https://www.haskell.org/hoogle/?hoogle=${
+  alias:  "ho",
+  name:   "hoogle",
+  search: `https://www.haskell.org/hoogle/?hoogle=${
     encodeURIComponent("+platform +xmonad +xmonad-contrib ")}`, // This tells Hoogle to include these modules in the search - encodeURIComponent is only used for better readability
-  compl:   `https://www.haskell.org/hoogle/?mode=json&hoogle=${
+  compl:  `https://www.haskell.org/hoogle/?mode=json&hoogle=${
     encodeURIComponent("+platform +xmonad +xmonad-contrib ")}`,
 }
 
@@ -1011,26 +1008,13 @@ completions.ho.callback = (response) => JSON.parse(response.text).results
 
 // Haskell Wiki
 completions.hw = {
-  alias:   "hw",
-  name:    "haskellwiki",
-  favicon: "https://www.haskell.org/img/favicon.ico",
-  search:  "https://wiki.haskell.org/index.php?go=go&search=",
-  compl:   "https://wiki.haskell.org/api.php?action=opensearch&format=json&formatversion=2&namespace=0&limit=10&suggest=true&search=",
+  alias:  "hw",
+  name:   "haskellwiki",
+  search: "https://wiki.haskell.org/index.php?go=go&search=",
+  compl:  "https://wiki.haskell.org/api.php?action=opensearch&format=json&formatversion=2&namespace=0&limit=10&suggest=true&search=",
 }
 
 completions.hw.callback = (response) => JSON.parse(response.text)[1]
-
-// Hayoo
-completions.hy = {
-  alias:   "hy",
-  name:    "hayoo",
-  favicon: "https://www.haskell.org/img/favicon.ico",
-  search:  "http://hayoo.fh-wedel.de/?query=",
-  compl:   "http://hayoo.fh-wedel.de/json?query=",
-}
-
-completions.hy.callback = (response) => JSON.parse(response.text).result
-  .map((s) => createURLItem(`[${s.resultType}] ${s.resultName}`, s.resultUri))
 
 // ****** HTML, CSS, JavaScript, NodeJS, ... ****** //
 
@@ -1058,39 +1042,28 @@ completions.no = {
 completions.md = {
   alias:  "md",
   name:   "mdn",
-  search: "https://developer.mozilla.org/en-US/search?q=",
-  compl:  "https://developer.mozilla.org/en-US/search.json?q=",
+  search: `https://developer.mozilla.org/${locale}/search?q=`,
+  compl:  `https://developer.mozilla.org/api/v1/search/${locale}?q=`,
 }
 
 completions.md.callback = (response) => {
   const res = JSON.parse(response.text)
-  return res.documents.map((s) => {
-    let excerpt = escape(s.excerpt)
-    if (excerpt.length > 240) {
-      excerpt = `${excerpt.slice(0, 240)}…`
-    }
-    res.query.split(" ").forEach((q) => {
-      excerpt = excerpt.replace(new RegExp(q, "gi"), "<strong>$&</strong>")
-    })
-    const title = escape(s.title)
-    const slug = escape(s.slug)
-    return createSuggestionItem(`
+  return res.documents.map((s) =>
+    createSuggestionItem(`
       <div>
-        <div class="title"><strong>${title}</strong></div>
-        <div style="font-size:0.8em"><em>${slug}</em></div>
-        <div>${excerpt}</div>
+        <div class="title"><strong>${s.title}</strong></div>
+        <div style="font-size:0.8em"><em>${s.slug}</em></div>
+        <div>${s.summary}</div>
       </div>
-    `, { url: `https://developer.mozilla.org/${s.slug}` })
-  })
+    `, { url: `https://developer.mozilla.org/${s.locale}/docs/${s.slug}` }))
 }
 
 // NPM registry search
 completions.np = {
-  alias:   "np",
-  name:    "npm",
-  favicon: "https://static.npmjs.com/da3ab40fb0861d15c83854c29f5f2962.png",
-  search:  "https://www.npmjs.com/search?q=",
-  compl:   "https://api.npms.io/v2/search/suggestions?size=20&q=",
+  alias:  "np",
+  name:   "npm",
+  search: "https://www.npmjs.com/search?q=",
+  compl:  "https://api.npms.io/v2/search/suggestions?size=20&q=",
 }
 
 completions.np.callback = (response) => JSON.parse(response.text)
@@ -1172,6 +1145,13 @@ completions.hn.callback = (response) => {
       </div>
     `, { url })
   })
+}
+
+// Twitter
+completions.tw = {
+  alias:  "tw",
+  name:   "twitter",
+  search: "https://twitter.com/search?q=",
 }
 
 // Reddit

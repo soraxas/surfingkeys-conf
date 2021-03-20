@@ -32,7 +32,13 @@ actions.copyOrgLink = () =>
   Clipboard.write(`[[${util.getCurrentLocation("href")}][${document.title}]]`)
 
 actions.copyMarkdownLink = () =>
-  Clipboard.write(`[${document.title}](${util.getCurrentLocation("href")})`)
+  Clipboard.write(
+    // I mostly use this feature to paste links into my Neuron (github.com/srid/neuron) notes.
+    // Due to a bug in Neuron's markdown library (github.com/jgm/commonmark-hs/issues/52),
+    // the vertical bar character breaks lists and titles.
+    // As a workaround, we backslash-escape any vertical bar characters.
+    `[${document.title.replace("|", "\\|")}](${util.getCurrentLocation("href")})`,
+  )
 
 actions.duplicateTab = () =>
   actions.openLink(util.getCurrentLocation("href"), { newTab: true, active: false })()
@@ -75,11 +81,38 @@ const rssSubscribeUrl = "https://feedrabbit.com/subscriptions/new?url="
 actions.rssSubscribe = ({ href = util.getCurrentLocation("href") } = {}) =>
   () => actions.openLink(`${rssSubscribeUrl}${encodeURIComponent(href)}`, { newTab: true })()
 
+actions.showSpeedReader = () => {
+  const script = document.createElement("script")
+  script.innerHTML = `(() => {
+    const sq = window.sq || {}
+    window.sq = sq
+    if (sq.script) {
+      sq.again()
+    } else if (sq.context !== "inner") {
+      sq.bookmarkletVersion = "0.3.0"
+      sq.iframeQueryParams = { host: "//squirt.io" }
+      sq.script = document.createElement("script")
+      sq.script.src = \`\${sq.iframeQueryParams.host}/bookmarklet/frame.outer.js\`
+      document.body.appendChild(sq.script)
+    }
+  })()`
+  document.body.appendChild(script)
+}
+
+actions.scrollToHash = (hash = null) => {
+  const h = (hash || document.location.hash).replace("#", "")
+  const e = document.getElementById(h) || document.querySelector(`[name="${h}"]`)
+  if (!e) {
+    return
+  }
+  e.scrollIntoView({ behavior: "smooth" })
+}
+
 // Surfingkeys-specific actions
 // ----------------------------
-actions.createHint = (selector, action) => () => {
+actions.createHints = (selector, action) => () => {
   if (typeof action === "undefined") {
-    // Use manual reassignment rather than default arg so that we can pre-compile without access
+    // Use manual reassignment rather than a default arg so that we can lint/bundle without access
     // to the Hints object
     action = Hints.dispatchMouseClick // eslint-disable-line no-param-reassign
   }
@@ -110,7 +143,7 @@ actions.togglePdfViewer = () => chrome.storage.local.get("noPdfViewer", (resp) =
   }
 })
 
-actions.previewLink = actions.createHint("a[href]", (a) =>
+actions.previewLink = actions.createHints("a[href]", (a) =>
   Front.showEditor(a.href, (url) => actions.openLink(url)(), "url"))
 
 // FakeSpot
@@ -271,9 +304,16 @@ actions.dg.goog = () => {
 
 // GitHub
 // ------
+// TODO: This is a mess
 actions.gh = {}
 actions.gh.star = ({ toggle = false } = {}) => async () => {
-  const starContainers = [...document.querySelectorAll("div.starring-container")]
+  const hasDisplayNoneParent = (e) =>
+    window.getComputedStyle(e).display === "none"
+    || (e.parentElement ? hasDisplayNoneParent(e.parentElement) : false)
+
+  const starContainers = Array.from(document.querySelectorAll("div.starring-container"))
+    .filter((e) => !hasDisplayNoneParent(e))
+
   if (starContainers.length === 0) return
 
   let container
@@ -287,7 +327,7 @@ actions.gh.star = ({ toggle = false } = {}) => async () => {
 
   const repoUrl = container.parentElement.parentElement.matches("ul.pagehead-actions")
     ? util.getCurrentLocation("pathname")
-    : new URL(container.parentElement.querySelector("a").href).pathname
+    : new URL(container.parentElement.querySelector("form").action).pathname
 
   const status = container.classList.contains("on")
   const repo = repoUrl.slice(1).split("/").slice(0, 2).join("/")
@@ -304,9 +344,9 @@ actions.gh.star = ({ toggle = false } = {}) => async () => {
   if (toggle) {
     verb = "has been"
     if (status) {
-      container.querySelector(".starred>button").click()
+      container.querySelector(".starred>button, button.starred").click()
     } else {
-      container.querySelector(".unstarred>button").click()
+      container.querySelector(".unstarred>button, button.unstarred").click()
     }
   }
 
@@ -330,6 +370,8 @@ actions.gh.parseRepo = (url = util.getCurrentLocation(), rootOnly = false) => {
   return cond
     ? {
       type:     "repo",
+      user,
+      repo,
       owner:    user,
       name:     repo,
       href:     url,
@@ -357,6 +399,7 @@ actions.gh.parseUser = (url = util.getCurrentLocation(), rootOnly = false) => {
     ? {
       type:     "user",
       name:     user,
+      user,
       href:     url,
       url:      u,
       userRoot: isRoot,
@@ -367,16 +410,17 @@ actions.gh.parseUser = (url = util.getCurrentLocation(), rootOnly = false) => {
 
 actions.gh.parseFile = (url = util.getCurrentLocation()) => {
   const u = url instanceof URL ? url : new URL(url)
-  const [user, repo, maybeBlob, ...rest] = u.pathname.split("/").filter((s) => s !== "")
+  const [user, repo, pathType, commitHash, ...rest] = u.pathname.split("/").filter((s) => s !== "")
   const cond = (
     u.origin === util.getCurrentLocation("origin")
     && typeof user === "string"
     && user.length > 0
     && typeof repo === "string"
     && repo.length > 0
-    && typeof maybeBlob === "string"
-    && (maybeBlob === "blob" || maybeBlob === "tree")
-    && rest.length > 0
+    && typeof pathType === "string"
+    && (pathType === "blob" || pathType === "tree")
+    && typeof commitHash === "string"
+    && commitHash.length > 0
     && /^([a-zA-Z0-9]+-?)+$/.test(user)
     && !ghReservedNames.check(user)
   )
@@ -385,16 +429,19 @@ actions.gh.parseFile = (url = util.getCurrentLocation()) => {
       type:     "file",
       user,
       repo,
+      pathType,
+      commitHash,
       href:     url,
       url:      u,
       filePath: rest,
+      repoBase: `/${user}/${repo}`,
     }
     : null
 }
 
 actions.gh.parseCommit = (url = util.getCurrentLocation()) => {
   const u = url instanceof URL ? url : new URL(url)
-  const [user, repo, commit, hash] = u.pathname.split("/").filter((s) => s !== "")
+  const [user, repo, commit, commitHash] = u.pathname.split("/").filter((s) => s !== "")
   const cond = (
     u.origin === util.getCurrentLocation("origin")
     && typeof user === "string"
@@ -403,17 +450,19 @@ actions.gh.parseCommit = (url = util.getCurrentLocation()) => {
     && repo.length > 0
     && typeof commit === "string"
     && commit === "commit"
-    && typeof hash === "string"
-    && hash.length > 0
+    && typeof commitHash === "string"
+    && commitHash.length > 0
     && /^([a-zA-Z0-9]+-?)+$/.test(user)
     && !ghReservedNames.check(user)
   )
   return cond
     ? {
-      type:       "commit",
-      href:       url,
-      url:        u,
-      commitHash: hash,
+      type: "commit",
+      user,
+      repo,
+      commitHash,
+      href: url,
+      url:  u,
     }
     : null
 }
@@ -509,7 +558,7 @@ actions.gh.openRepoOwner = () => {
 }
 
 actions.gh.openProfile = () =>
-  actions.openLink(`${document.querySelector("a.user-profile-link").href}`)()
+  actions.openLink(`/${document.querySelector("meta[name='user-login']").content}`)()
 
 actions.gh.toggleLangStats = () =>
   document.querySelector(".repository-lang-stats-graph").click()
@@ -518,12 +567,12 @@ actions.gh.goParent = () => {
   const segments = util.getCurrentLocation("pathname")
     .split("/").filter((s) => s !== "")
   const newPath = (() => {
-    const [user, repo, maybeBlob] = segments
+    const [user, repo, pathType] = segments
     switch (segments.length) {
     case 0:
       return false
     case 4:
-      switch (maybeBlob) {
+      switch (pathType) {
       case "blob":
       case "tree":
         return [user, repo]
@@ -534,7 +583,7 @@ actions.gh.goParent = () => {
       }
       break
     case 5:
-      if (maybeBlob === "blob") {
+      if (pathType === "blob") {
         return [user, repo]
       }
       break
@@ -549,16 +598,82 @@ actions.gh.goParent = () => {
   }
 }
 
-actions.gh.viewRepoHealth = () => {
-  const repo = actions.gh.parseRepo()
-  if (repo === null) return
-  actions.openLink(`https://repohealth.info/report${repo.repoBase}`, { newTab: true })()
+actions.gh.viewSourceGraph = () => {
+  const url = new URL("https://sourcegraph.com/github.com")
+  let page = null
+  // The following conditional expressions are indeed intended to be
+  // assignments, this is not a bug.
+  if ((page = actions.gh.parseFile(window.location.href)) !== null) {
+    const filePath = page.filePath.join("/")
+    url.pathname += `/${page.user}/${page.repo}@${page.commitHash}/-/${page.pathType}/${filePath}`
+    if (window.location.hash !== "") {
+      url.hash = window.location.hash
+    } else if (!util.isElementInViewport(document.querySelector("#L1"))) {
+      for (const e of document.querySelectorAll(".js-line-number")) {
+        if (util.isElementInViewport(e)) {
+          url.hash = e.id
+          break
+        }
+      }
+    }
+  } else if ((page = actions.gh.parseCommit(window.location.href)) !== null) {
+    url.pathname += `/${page.user}/${page.repo}@${page.commitHash}`
+  } else if ((page = actions.gh.parseRepo(window.location.href)) !== null) {
+    url.pathname += `/${page.user}/${page.repo}`
+  } else {
+    url.pathname = ""
+  }
+
+  actions.openLink(url.href, { newTab: true })()
 }
 
 actions.gh.viewRaw = () => {
   const file = actions.gh.parseFile()
   if (file === null) return
   actions.openLink(`https://raw.githack.com/${file.user}/${file.repo}/${file.filePath.join("/")}`, { newTab: true })()
+}
+
+actions.gh.openRepoFromClipboard = async ({ newTab = true } = {}) =>
+  actions.openLink(`https://github.com/${await navigator.clipboard.readText()}`, { newTab })()
+
+actions.gh.openFileFromClipboard = async ({ newTab = true } = {}) => {
+  const clip = await navigator.clipboard.readText()
+  if (typeof clip !== "string" || clip.length === 0) {
+    return
+  }
+
+  const loc = util.getCurrentLocation()
+  const dest = {
+    user:       null,
+    repo:       null,
+    commitHash: "master",
+  }
+
+  const file = actions.gh.parseFile(loc)
+  if (file !== null) {
+    dest.user = file.user
+    dest.repo = file.repo
+    dest.commitHash = file.commitHash
+  } else {
+    const commit = actions.gh.parseCommit(loc)
+    if (commit !== null) {
+      dest.user = commit.user
+      dest.repo = commit.repo
+      dest.commitHash = commit.commitHash
+    } else {
+      const repository = actions.gh.parseRepo(loc)
+      if (repository !== null) {
+        return
+      }
+      dest.user = repository.user
+      dest.repo = repository.repo
+    }
+  }
+
+  actions.openLink(
+    `https://github.com/${dest.user}/${dest.repo}/tree/${dest.commitHash}/${clip}`,
+    { newTab },
+  )()
 }
 
 // GitLab
@@ -575,6 +690,17 @@ actions.gl.star = () => {
   }
   Front.showBanner(`${star} Repository ${repo} ${action}`)
 }
+
+// Twitter
+// ------
+actions.tw = {}
+actions.tw.openUser = () =>
+  actions.createHints([].concat(
+    [...document.querySelectorAll("a[role='link'] img[src^='https://pbs.twimg.com/profile_images']")]
+      .map((e) => e.closest("a")),
+    [...document.querySelectorAll("a[role='link']")]
+      .filter((e) => e.text.match(/^@/)),
+  ))()
 
 // Reddit
 // ------
@@ -614,7 +740,7 @@ actions.hn.goParent = () => {
 
 actions.hn.collapseNextComment = () => {
   const vis = Array.from(document.querySelectorAll("a.togg"))
-    .filter((e) => e.innerText === "[-]" && util.isElementInViewport(e))
+    .filter((e) => e.innerText === "[–]" && util.isElementInViewport(e))
   if (vis.length > 0) {
     vis[0].click()
   }
@@ -663,7 +789,7 @@ actions.ph.openExternal = () => {
 // Dribbble
 // --------
 actions.dr = {}
-actions.dr.attachment = (cb = (a) => actions.openLink(a, { newTab: true })()) => actions.createHint(".attachments .thumb", (a) => cb(a.src.replace("/thumbnail/", "/")))
+actions.dr.attachment = (cb = (a) => actions.openLink(a, { newTab: true })()) => actions.createHints(".attachments .thumb", (a) => cb(a.src.replace("/thumbnail/", "/")))
 
 // Wikipedia
 // ---------
@@ -678,6 +804,103 @@ actions.wp.toggleSimple = () => {
       return s
     }).filter((s) => s !== "").join(".")
   actions.openLink(u.href)()
+}
+
+actions.wp.viewWikiRank = () => {
+  const h = document.location.hostname.split(".")
+  const lang = h.length > 2 && h[0] !== "www" ? h[0] : "en"
+  const p = document.location.pathname.split("/")
+  if (p.length < 3 || p[1] !== "wiki") {
+    return
+  }
+  const article = p.slice(2).join("/")
+  actions.openLink(`https://wikirank.net/${lang}/${article}`, { newTab: true })()
+}
+
+// Nest Thermostat Controller
+// --------------------------
+actions.nt = {}
+actions.nt.adjustTemp = (dir) => () =>
+  document.querySelector(
+    `button[data-test='thermozilla-controller-controls-${dir > 0 ? "in" : "de"}crement-button']`,
+  ).click()
+
+actions.nt.setMode = (mode) => async () => {
+  const selectMode = async (popover) => {
+    const query = () => !popover.isConnected
+    const q = query()
+    if (q) return q
+    popover.querySelector(`button[data-test='thermozilla-mode-switcher-${mode}-button']`).click()
+    return util.until(query)
+  }
+
+  const openPopover = async () => {
+    const query = () => document.querySelector("div[data-test='thermozilla-mode-popover']")
+    const q = query()
+    if (q) return q
+    document.querySelector("button[data-test='thermozilla-mode-button']").click()
+    return util.until(query)
+  }
+
+  const popover = await openPopover()
+  return selectMode(popover)
+}
+
+actions.nt.setFan = (desiredState) => async () => {
+  const startStopFan = async (startStop, popover) => {
+    const query = () => !popover.isConnected
+    const q = query()
+    if (q) return q
+    popover.querySelector(`div[data-test='thermozilla-fan-timer-${startStop}-button']`).click()
+    return util.until(query)
+  }
+
+  const selectFanTime = async (popover, listbox) => {
+    const query = () => !listbox.isConnected
+    const q = query()
+    if (q) return q
+    Hints.dispatchMouseClick(listbox.querySelector("div[role='option']:last-child"))
+    return util.until(query)
+  }
+
+  const openFanListbox = async (popover) => {
+    const query = () => popover.querySelector("div[role='listbox']")
+    const q = query()
+    if (q) return q
+    Hints.dispatchMouseClick(popover.querySelector("div[role='combobox']"))
+    return util.until(query)
+  }
+
+  const openPopover = async () => {
+    const query = () => document.querySelector("div[data-test='thermozilla-fan-timer-popover']")
+    const q = query()
+    if (q) return q
+    document.querySelector("button[data-test='thermozilla-fan-button']").click()
+    return util.until(query)
+  }
+
+  const fanRunning = () => document.querySelector("div[data-test='thermozilla-aag-fan-listcell-title']")
+
+  const startFan = async () => {
+    const popover = await openPopover()
+    const listbox = await openFanListbox(popover)
+    await selectFanTime(popover, listbox)
+    return startStopFan("start", popover)
+  }
+
+  const stopFan = async () => {
+    const popover = await openPopover()
+    await startStopFan("stop", popover)
+    await util.until(() => !fanRunning())
+  }
+
+  if (fanRunning()) {
+    await stopFan()
+  }
+
+  if (desiredState === 1) {
+    await startFan()
+  }
 }
 
 module.exports = actions

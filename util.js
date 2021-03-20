@@ -9,16 +9,38 @@ util.getCurrentLocation = (prop = "href") => {
   return window.location[prop]
 }
 
-util.escape = (str) => String(str).replace(/[&<>"'`=/]/g, (s) => ({
-  "&":  "&amp;",
-  "<":  "&lt;",
-  ">":  "&gt;",
-  "\"": "&quot;",
-  "'":  "&#39;",
-  "/":  "&#x2F;",
-  "`":  "&#x60;",
-  "=":  "&#x3D;",
-}[s]))
+util.escape = (str) =>
+  String(str).replace(/[&<>"'`=/]/g, (s) => ({
+    "&":  "&amp;",
+    "<":  "&lt;",
+    ">":  "&gt;",
+    "\"": "&quot;",
+    "'":  "&#39;",
+    "/":  "&#x2F;",
+    "`":  "&#x60;",
+    "=":  "&#x3D;",
+  }[s]))
+
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping
+util.escapeRegExp = (str) =>
+  str.replace(/[.*+\-?^${}()|[\]\\]/g, "\\$&")
+
+util.until = (check, test = (a) => a, maxAttempts = 50, interval = 50) =>
+  new Promise((resolve, reject) => {
+    const f = (attempts = 0) => {
+      const res = check()
+      if (!test(res)) {
+        if (attempts > maxAttempts) {
+          reject(new Error("until: timeout"))
+        } else {
+          setTimeout(() => f(attempts + 1), interval)
+        }
+        return
+      }
+      resolve(res)
+    }
+    f()
+  })
 
 util.createSuggestionItem = (html, props = {}) => {
   const li = document.createElement("li")
@@ -111,7 +133,7 @@ util.processMaps = (maps, aliases, siteleader) => {
 
     const fullDescription = `#${category} ${description}`
 
-    if (mapObj.map !== undefined) {
+    if (typeof mapObj.map !== "undefined") {
       map(alias, mapObj.map)
     } else {
       mapkey(key, fullDescription, callback, opts)
@@ -127,7 +149,7 @@ util.processCompletions = (completions, searchleader) => Object.values(completio
   addSearchAliasX(s.alias, s.name, s.search, searchleader, s.compl, s.callback)
   mapkey(`${searchleader}${s.alias}`, `#8Search ${s.name}`, () => Front.openOmnibar({ type: "SearchEngine", extra: s.alias }))
   mapkey(`c${searchleader}${s.alias}`, `#8Search ${s.name} with clipboard contents`, () => {
-    Clipboard.read((c) => {
+    Clipboard.read((c) => { // TODO: use navigator.clipboard
       Front.openOmnibar({ type: "SearchEngine", pref: c.data, extra: s.alias })
     })
   })

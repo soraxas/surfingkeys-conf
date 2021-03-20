@@ -29,6 +29,20 @@ util.addSettings({
   // tabsThreshold: 7,
   modeAfterYank: "Normal",
   hintShiftNonActive: true,
+  defaultSearchEngine:      "dd",
+  theme:                    `
+    body {
+      font-family: "DejaVu Sans", DejaVu, Arial, sans-serif;
+    }
+
+    /* Disable RichHints CSS animation */
+    .expandRichHints {
+        animation: 0s ease-in-out 1 forwards expandRichHints;
+    }
+    .collapseRichHints {
+        animation: 0s ease-in-out 1 forwards collapseRichHints;
+    }
+  `,
 })
 
 if (typeof Front !== "undefined") {
@@ -439,4 +453,4 @@ if (typeof settings !== "undefined") {
     font-weight: var(--font-weight);
   }
   `;
-} 
+}
