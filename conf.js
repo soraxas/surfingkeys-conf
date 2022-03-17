@@ -78,7 +78,11 @@ if (typeof Front !== "undefined") {
 }
 
 if (typeof Hints !== "undefined") {
-  Hints.characters = "asdfgyuiopqwertnmzxcvb"
+  // normal
+  // Hints.characters = "asdfgyuiopqwertnmzxcvb"
+
+  // colemak-DH
+  Hints.characters = "arstgjluy;qwfpbkhxcdv"
 }
 
 // Leader for site-specific mappings

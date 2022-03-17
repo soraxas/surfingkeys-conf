@@ -15,6 +15,7 @@ const unmaps = {
     "<Ctrl-j>", "<Ctrl-h>",
     "<Ctrl-d>", "<Ctrl-u>",
     //    "<Ctrl-n>", "<Ctrl-k>",
+    "ZZ", "ZR",
   ],
   imappings: [
     ":",
