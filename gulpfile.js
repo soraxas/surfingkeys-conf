@@ -29,6 +29,7 @@ const webpackConfig = require("./webpack.config.js")
 const copyrightYearOne = 2017
 
 const paths = {
+  compatibilityLayer: "compatilibityLayer.js", // For surfingkeys#1.x^ compatibility.
   scripts:          ["conf.priv.js", "completions.js", "conf.js", "actions.js", "help.js", "keys.js", "util.js"],
   entry:            "conf.js",
   gulpfile:         "gulpfile.js",
@@ -347,17 +348,28 @@ const build = () =>
       throw err
     })
     .pipe(rename(paths.scriptOut))
-    .pipe(dest(paths.buildDir))
+    .pipe(dest(paths.buildDir, { append: true }))
     .pipe(notify({
       title:   `Build success [${pkg.name}]`,
       message: "No issues",
     }))
+// For surfingkeys#1.x^ compatibility.
+const addCompatibilityLayer = () =>
+  src(paths.compatibilityLayer)
+    .pipe(rename(paths.scriptOut))
+    .pipe(dest(paths.buildDir))
+
+task("addCompatibilityLayer", )
 
 task("build",
-  parallel(
-    "lint",
-    build,
-  ))
+  series(
+    addCompatibilityLayer,
+    build
+    ))
+    // parallel(
+    //   "lint",
+    //   build,
+    // )))
 
 task("build-full",
   series(

@@ -1,29 +1,26 @@
-// Built on 2022-03-17 16:20
+// Built on 2022-07-31 16:00
 // URL: https://raw.githubusercontent.com/soraxas/surfingkeys-conf/MY-LOCAL-USE/build/surfingkeys.js
-const
-{
-aceVimMap,
-mapkey,
-imap,
-imapkey,
-getClickableElements,
-vmapkey,
-map,
-unmap,
-vunmap,
-cmap,
-addSearchAlias,
-removeSearchAlias,
-tabOpenLink,
-readText,
-Clipboard,
-Front,
-Hints,
-Visual,
-RUNTIME
-}
-=
-api;
+const {
+    aceVimMap,
+    mapkey,
+    imap,
+    imapkey,
+    getClickableElements,
+    vmapkey,
+    map,
+    unmap,
+    vunmap,
+    cmap,
+    addSearchAlias,
+    removeSearchAlias,
+    tabOpenLink,
+    readText,
+    Clipboard,
+    Front,
+    Hints,
+    Visual,
+    RUNTIME
+} = api;
 /*
  * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
  * This devtool is neither made for production nor for readable output files.
@@ -134,7 +131,7 @@ eval("module.exports = JSON.parse('[\"400\",\"401\",\"402\",\"403\",\"404\",\"40
   \*****************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("const { categories } = __webpack_require__(/*! ./help */ \"./help.js\")\n\nconst util = {}\n\nutil.getCurrentLocation = (prop = \"href\") => {\n  if (typeof window === \"undefined\") {\n    return \"\"\n  }\n  return window.location[prop]\n}\n\nutil.escape = (str) =>\n  String(str).replace(/[&<>\"'`=/]/g, (s) => ({\n    \"&\":  \"&amp;\",\n    \"<\":  \"&lt;\",\n    \">\":  \"&gt;\",\n    \"\\\"\": \"&quot;\",\n    \"'\":  \"&#39;\",\n    \"/\":  \"&#x2F;\",\n    \"`\":  \"&#x60;\",\n    \"=\":  \"&#x3D;\",\n  }[s]))\n\n// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping\nutil.escapeRegExp = (str) =>\n  str.replace(/[.*+\\-?^${}()|[\\]\\\\]/g, \"\\\\$&\")\n\nutil.until = (check, test = (a) => a, maxAttempts = 50, interval = 50) =>\n  new Promise((resolve, reject) => {\n    const f = (attempts = 0) => {\n      const res = check()\n      if (!test(res)) {\n        if (attempts > maxAttempts) {\n          reject(new Error(\"until: timeout\"))\n        } else {\n          setTimeout(() => f(attempts + 1), interval)\n        }\n        return\n      }\n      resolve(res)\n    }\n    f()\n  })\n\nutil.createSuggestionItem = (html, props = {}) => {\n  const li = document.createElement(\"li\")\n  li.innerHTML = html\n  return { html: li.outerHTML, props }\n}\n\nutil.createURLItem = (title, url, sanitize = true) => {\n  let t = title\n  let u = url\n  if (sanitize) {\n    t = util.escape(t)\n    u = new URL(u).toString()\n  }\n  return util.createSuggestionItem(`\n      <div class=\"title\">${t}</div>\n      <div class=\"url\">${u}</div>\n    `, { url: u })\n}\n\nutil.createHintsAsync = (cssSelector, onHintKey, attrs) =>\n  new Promise((resolve) =>\n    Hints.create(cssSelector, (...args) => resolve(...args), attrs))\n\nutil.createHintsFiltered = (filter, {\n  elems = [...document.querySelectorAll(\"a[href]\")],\n  action = Hints.dispatchMouseClick,\n} = {}) =>\n  Hints.create(elems.filter(filter), action)\n\n// Determine if the given rect is visible in the viewport\nutil.isRectVisibleInViewport = (rect) =>\n  rect.height > 0\n  && rect.width > 0\n  && rect.bottom >= 0\n  && rect.right >= 0\n  && rect.top <= (window.innerHeight || document.documentElement.clientHeight)\n  && rect.left <= (window.innerWidth || document.documentElement.clientWidth)\n\n// Determine if the given element is visible in the viewport\nutil.isElementInViewport = (e) =>\n  e.offsetHeight > 0 && e.offsetWidth > 0\n  && !e.getAttribute(\"disabled\")\n  && util.isRectVisibleInViewport(e.getBoundingClientRect())\n\n// Process Unmaps\nutil.rmMaps = (a) => {\n  if (typeof unmap === \"undefined\") {\n    return\n  }\n  a.forEach((u) => unmap(u))\n}\n\n// Process Iunmaps\nutil.rmIMaps = (a) => {\n  /* global iunmap */\n  if (typeof iunmap === \"undefined\") {\n    return\n  }\n  a.forEach((u) => iunmap(u))\n}\n\nutil.rmSearchAliases = (a) => Object.entries(a).forEach(([leader, items]) => {\n  if (typeof removeSearchAliasX === \"undefined\") {\n    return\n  }\n  items.forEach((v) => removeSearchAliasX(v, leader))\n})\n\n// Process Mappings\nutil.processMaps = (maps, aliases, siteleader) => {\n  if (typeof map === \"undefined\" || typeof mapkey === \"undefined\") {\n    return\n  }\n\n  const hydratedAliases = Object.entries(aliases)\n    .flatMap(([baseDomain, aliasDomains]) =>\n      aliasDomains.flatMap((a) => ({ [a]: maps[baseDomain] })))\n\n  const mapsAndAliases = Object.assign({}, maps, ...hydratedAliases)\n\n  Object.entries(mapsAndAliases).forEach(([domain, domainMaps]) => domainMaps.forEach(((mapObj) => {\n    const {\n      alias,\n      callback,\n      leader = (domain === \"global\") ? \"\" : siteleader,\n      category = categories.misc,\n      description = \"\",\n    } = mapObj\n    const opts = {}\n\n    const key = `${leader}${alias}`\n\n    // Determine if it's a site-specific mapping\n    if (domain !== \"global\") {\n      const d = domain.replace(\".\", \"\\\\.\")\n      opts.domain = new RegExp(`^http(s)?://(([a-zA-Z0-9-_]+\\\\.)*)(${d})(/.*)?`)\n    }\n\n    const fullDescription = `#${category} ${description}`\n\n    if (typeof mapObj.map !== \"undefined\") {\n      map(alias, mapObj.map)\n    } else {\n      mapkey(key, fullDescription, callback, opts)\n    }\n  })))\n}\n\n// process completions\nutil.processCompletions = (completions, searchleader) => Object.values(completions).forEach((s) => {\n  if (typeof Front === \"undefined\" || typeof addSearchAliasX === \"undefined\" || typeof mapkey === \"undefined\") {\n    return\n  }\n  addSearchAliasX(s.alias, s.name, s.search, searchleader, s.compl, s.callback)\n  mapkey(`${searchleader}${s.alias}`, `#8Search ${s.name}`, () => Front.openOmnibar({ type: \"SearchEngine\", extra: s.alias }))\n  mapkey(`c${searchleader}${s.alias}`, `#8Search ${s.name} with clipboard contents`, () => {\n    Clipboard.read((c) => { // TODO: use navigator.clipboard\n      Front.openOmnibar({ type: \"SearchEngine\", pref: c.data, extra: s.alias })\n    })\n  })\n})\n\nutil.addSettings = (s) => {\n  if (typeof settings === \"undefined\") {\n    return\n  }\n  Object.assign(settings, s)\n}\n\nmodule.exports = util\n\n\n//# sourceURL=webpack://surfingkeys-conf/./util.js?");
+eval("const { categories } = __webpack_require__(/*! ./help */ \"./help.js\")\n\nconst util = {}\n\nutil.getCurrentLocation = (prop = \"href\") => {\n  if (typeof window === \"undefined\") {\n    return \"\"\n  }\n  return window.location[prop]\n}\n\nutil.escape = (str) =>\n  String(str).replace(/[&<>\"'`=/]/g, (s) => ({\n    \"&\":  \"&amp;\",\n    \"<\":  \"&lt;\",\n    \">\":  \"&gt;\",\n    \"\\\"\": \"&quot;\",\n    \"'\":  \"&#39;\",\n    \"/\":  \"&#x2F;\",\n    \"`\":  \"&#x60;\",\n    \"=\":  \"&#x3D;\",\n  }[s]))\n\n// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#Escaping\nutil.escapeRegExp = (str) =>\n  str.replace(/[.*+\\-?^${}()|[\\]\\\\]/g, \"\\\\$&\")\n\nutil.until = (check, test = (a) => a, maxAttempts = 50, interval = 50) =>\n  new Promise((resolve, reject) => {\n    const f = (attempts = 0) => {\n      const res = check()\n      if (!test(res)) {\n        if (attempts > maxAttempts) {\n          reject(new Error(\"until: timeout\"))\n        } else {\n          setTimeout(() => f(attempts + 1), interval)\n        }\n        return\n      }\n      resolve(res)\n    }\n    f()\n  })\n\nutil.createSuggestionItem = (html, props = {}) => {\n  const li = document.createElement(\"li\")\n  li.innerHTML = html\n  return { html: li.outerHTML, props }\n}\n\nutil.createURLItem = (title, url, sanitize = true) => {\n  let t = title\n  let u = url\n  if (sanitize) {\n    t = util.escape(t)\n    u = new URL(u).toString()\n  }\n  return util.createSuggestionItem(`\n      <div class=\"title\">${t}</div>\n      <div class=\"url\">${u}</div>\n    `, { url: u })\n}\n\nutil.createHintsAsync = (cssSelector, onHintKey, attrs) =>\n  new Promise((resolve) =>\n    Hints.create(cssSelector, (...args) => resolve(...args), attrs))\n\nutil.createHintsFiltered = (filter, {\n  elems = [...document.querySelectorAll(\"a[href]\")],\n  action = Hints.dispatchMouseClick,\n} = {}) =>\n  Hints.create(elems.filter(filter), action)\n\n// Determine if the given rect is visible in the viewport\nutil.isRectVisibleInViewport = (rect) =>\n  rect.height > 0\n  && rect.width > 0\n  && rect.bottom >= 0\n  && rect.right >= 0\n  && rect.top <= (window.innerHeight || document.documentElement.clientHeight)\n  && rect.left <= (window.innerWidth || document.documentElement.clientWidth)\n\n// Determine if the given element is visible in the viewport\nutil.isElementInViewport = (e) =>\n  e.offsetHeight > 0 && e.offsetWidth > 0\n  && !e.getAttribute(\"disabled\")\n  && util.isRectVisibleInViewport(e.getBoundingClientRect())\n\n// Process Unmaps\nutil.rmMaps = (a) => {\n  if (typeof unmap === \"undefined\") {\n    return\n  }\n  a.forEach((u) => unmap(u))\n}\n\n// Process Iunmaps\nutil.rmIMaps = (a) => {\n  /* global iunmap */\n  if (typeof iunmap === \"undefined\") {\n    return\n  }\n  a.forEach((u) => iunmap(u))\n}\n\nutil.rmSearchAliases = (a) => Object.entries(a).forEach(([leader, items]) => {\n  if (typeof removeSearchAliasX === \"undefined\") {\n    return\n  }\n  items.forEach((v) => removeSearchAliasX(v, leader))\n})\n\n// Process Mappings\nutil.processMaps = (maps, aliases, siteleader) => {\n  if (typeof map === \"undefined\" || typeof mapkey === \"undefined\") {\n    return\n  }\n\n  const hydratedAliases = Object.entries(aliases)\n    .flatMap(([baseDomain, aliasDomains]) =>\n      aliasDomains.flatMap((a) => ({ [a]: maps[baseDomain] })))\n\n  const mapsAndAliases = Object.assign({}, maps, ...hydratedAliases)\n\n  Object.entries(mapsAndAliases).forEach(([domain, domainMaps]) => domainMaps.forEach(((mapObj) => {\n    const {\n      alias,\n      callback,\n      leader = (domain === \"global\") ? \"\" : siteleader,\n      category = categories.misc,\n      description = \"\",\n    } = mapObj\n    const opts = {}\n\n    const key = `${leader}${alias}`\n\n    // Determine if it's a site-specific mapping\n    if (domain !== \"global\") {\n      const d = domain.replace(\".\", \"\\\\.\")\n      opts.domain = new RegExp(`^http(s)?://(([a-zA-Z0-9-_]+\\\\.)*)(${d})(/.*)?`)\n    }\n\n    const fullDescription = `#${category} ${description}`\n\n    if (typeof mapObj.map !== \"undefined\") {\n      map(alias, mapObj.map)\n    } else {\n      mapkey(key, fullDescription, callback, opts)\n    }\n  })))\n}\n\n// process completions\nutil.processCompletions = (completions, searchleader) => Object.values(completions).forEach((s) => {\n  if (typeof Front === \"undefined\" || typeof addSearchAliasX === \"undefined\" || typeof mapkey === \"undefined\") {\n    return\n  }\n  addSearchAlias(s.alias, s.name, s.search, searchleader, s.compl, s.callback)\n  mapkey(`${searchleader}${s.alias}`, `#8Search ${s.name}`, () => Front.openOmnibar({ type: \"SearchEngine\", extra: s.alias }))\n  mapkey(`c${searchleader}${s.alias}`, `#8Search ${s.name} with clipboard contents`, () => {\n    Clipboard.read((c) => { // TODO: use navigator.clipboard\n      Front.openOmnibar({ type: \"SearchEngine\", pref: c.data, extra: s.alias })\n    })\n  })\n})\n\nutil.addSettings = (s) => {\n  if (typeof settings === \"undefined\") {\n    return\n  }\n  Object.assign(settings, s)\n}\n\nmodule.exports = util\n\n\n//# sourceURL=webpack://surfingkeys-conf/./util.js?");
 
 /***/ })
 

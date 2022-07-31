@@ -155,7 +155,7 @@ util.processCompletions = (completions, searchleader) => Object.values(completio
   if (typeof Front === "undefined" || typeof addSearchAliasX === "undefined" || typeof mapkey === "undefined") {
     return
   }
-  addSearchAliasX(s.alias, s.name, s.search, searchleader, s.compl, s.callback)
+  addSearchAlias(s.alias, s.name, s.search, searchleader, s.compl, s.callback)
   mapkey(`${searchleader}${s.alias}`, `#8Search ${s.name}`, () => Front.openOmnibar({ type: "SearchEngine", extra: s.alias }))
   mapkey(`c${searchleader}${s.alias}`, `#8Search ${s.name} with clipboard contents`, () => {
     Clipboard.read((c) => { // TODO: use navigator.clipboard

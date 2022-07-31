@@ -20,7 +20,8 @@ $(CONF): $(JS_SRC)
 	gulp build
 	#	add timestamp to config
 	#	use a tmp file to echo to beginning of file
-	printf '%s\n' $(BUILT_COMMENT) $(URL_COMMENT) $$(cat _compatibility_layer.txt) | cat - $(CONF) > $(CONF_TMP) && mv $(CONF_TMP) $(CONF)
+	printf '%s\n' $(BUILT_COMMENT) $(URL_COMMENT) | cat - $(CONF) > $(CONF_TMP) && mv $(CONF_TMP) $(CONF)
+	# printf '%s\n' $(BUILT_COMMENT) $(URL_COMMENT) $$(cat _compatibility_layer.txt) | cat - $(CONF) > $(CONF_TMP) && mv $(CONF_TMP) $(CONF)
 
 publish: $(CONF)
 	git add -f $(CONF)
