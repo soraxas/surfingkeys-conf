@@ -482,6 +482,17 @@ const parseDatamuseRes = (res, o = {}) => {
 }
 
 // Dictionary
+// completions.de = {
+//   alias: "de",
+//   name: "define",
+//   search: "https://www.dictionary.com/browse/",
+//   compl: "https://api.datamuse.com/words?md=d&sp=%s*",
+//   opts: {
+//     maxDefs: 16,
+//     ellipsis: true,
+//     wordBaseURL: "https://www.dictionary.com/browse/",
+//   },
+// }
 completions.de = {
   alias: "de",
   name: "define",
