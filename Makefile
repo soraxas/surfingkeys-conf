@@ -11,7 +11,7 @@ CONF=$(DIR)/$(CONF_NAME)
 CONF_TMP=$(CONF).tmp
 
 # depends on all *.js files
-JS_SRC=$(wildcard *.js)
+JS_SRC=$(wildcard src/*.js)
 
 
 all: $(CONF)
