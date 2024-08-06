@@ -254,7 +254,8 @@ export default {
     // normal
     // hintCharacters: "qwertasdfgzxcvb",
     // colemak-DH
-    hintCharacters: "arstgjluy;qwfpbkhxcdv",
+    hintCharacters: "arstoiengmplfuwydhc,x.",
+    // hintCharacters: "arstgjluy;qwfpbkhxcdv",
     omnibarSuggestionTimeout: 500,
     richHintsForKeystroke: 1,
     defaultSearchEngine: "dd",
