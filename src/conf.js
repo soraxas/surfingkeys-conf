@@ -246,6 +246,7 @@ api.Hints.style(
   "text"
 )
 
+api.Hints.setCharacters('arstoiengmplfuwydhc,x.');
 
 
 export default {
@@ -254,7 +255,6 @@ export default {
     // normal
     // hintCharacters: "qwertasdfgzxcvb",
     // colemak-DH
-    hintCharacters: "arstoiengmplfuwydhc,x.",
     // hintCharacters: "arstgjluy;qwfpbkhxcdv",
     omnibarSuggestionTimeout: 500,
     richHintsForKeystroke: 1,
