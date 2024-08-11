@@ -246,7 +246,7 @@ api.Hints.style(
   "text"
 )
 
-api.Hints.setCharacters('arstoiengmplfuwydhc,x.');
+api.Hints.setCharacters('arstoiengmplfuwydhvkc,');
 
 
 export default {
