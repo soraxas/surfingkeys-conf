@@ -246,7 +246,8 @@ api.Hints.style(
   "text"
 )
 
-api.Hints.setCharacters('arstoiengmplfuwydhvkc,');
+// api.Hints.setCharacters('arstoiengmplfuwydhvkc,');
+api.Hints.setCharacters('rtkneimyswfauhlvpgdcxzq;bj/RTKNEIMYSWFAUHLVPGDCXZQ:BJ?');
 
 
 export default {
