@@ -17,7 +17,7 @@ JS_SRC=$(wildcard src/*.js)
 all: $(CONF)
 
 $(CONF): $(JS_SRC)
-	gulp build
+	npm run gulp build
 	#	add timestamp to config
 	#	use a tmp file to echo to beginning of file
 	printf '%s\n' $(BUILT_COMMENT) $(URL_COMMENT) | cat - $(CONF) > $(CONF_TMP) && mv $(CONF_TMP) $(CONF)

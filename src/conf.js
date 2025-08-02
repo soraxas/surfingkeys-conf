@@ -247,7 +247,8 @@ api.Hints.style(
 )
 
 // api.Hints.setCharacters('arstoiengmplfuwydhvkc,');
-api.Hints.setCharacters('rtkneimyswfauhlvpgdcxzq;bj/RTKNEIMYSWFAUHLVPGDCXZQ:BJ?');
+api.Hints.setCharacters('rtkneimyswfauhlvpgdcxzq;bj');
+// api.Hints.setCharacters('rtkneimyswfauhlvpgdcxzq;bj/RTKNEIMYSWFAUHLVPGDCXZQ:BJ?');
 
 
 export default {
