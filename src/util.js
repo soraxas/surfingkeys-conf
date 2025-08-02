@@ -66,14 +66,19 @@ util.until = (check, test = (a) => a, maxAttempts = 50, interval = 50) =>
   })
 
 const localStorageFns = () => {
-  if (typeof browser !== "undefined") {
-    return [browser.storage.local.get, browser.storage.local.set]
-  }
-  if (typeof chrome !== "undefined") {
-    return [chrome.storage.local.get, chrome.storage.local.set].map((fn) =>
-      util.promisify(fn.bind(chrome.storage.local))
-    )
-  }
+  /* chrome.storage.local is not available in Mv3, so let's disable it for now.
+   *
+   * https://github.com/brookhong/Surfingkeys/issues/2156
+   */
+
+  // if (typeof browser !== "undefined") {
+  //   return [browser.storage.local.get, browser.storage.local.set]
+  // }
+  // if (typeof chrome !== "undefined") {
+  //   return [chrome.storage.local.get, chrome.storage.local.set].map((fn) =>
+  //     util.promisify(fn.bind(chrome.storage.local))
+  //   )
+  // }
   const fn = () =>
     new Error("local storage unavailable: unsupported environment")
   return [fn, fn]
