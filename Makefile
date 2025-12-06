@@ -13,11 +13,13 @@ CONF_TMP=$(CONF).tmp
 # depends on all *.js files
 JS_SRC=$(wildcard src/*.js)
 
+NPM=mise exec -- npm
+
 
 all: $(CONF)
 
 $(CONF): $(JS_SRC)
-	npm run gulp build
+	$(NPM) run gulp build
 	#	add timestamp to config
 	#	use a tmp file to echo to beginning of file
 	printf '%s\n' $(BUILT_COMMENT) $(URL_COMMENT) | cat - $(CONF) > $(CONF_TMP) && mv $(CONF_TMP) $(CONF)
